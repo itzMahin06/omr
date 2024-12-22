@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMR Sheet Generator</title>
+    <style>
+        body {
+            font-family: 'Kalpurush', Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.5;
+        }
+        .form-container {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+        input, button {
+            padding: 8px;
+            margin-bottom: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .preview {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 20px;
+            page-break-after: always;
+        }
+        .omr-header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .omr-header h2 {
+            margin: 5px 0;
+            font-size: 16px;
+        }
+        .omr-header p {
+            margin: 2px 0;
+            font-size: 12px;
+        }
+        .omr-questions {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .question {
+            width: 50%;
+            padding: 5px;
+        }
+        .question span {
+            font-size: 12px;
+        }
+        .options {
+            display: flex;
+            justify-content: space-around;
+        }
+        .circle {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 1px solid #000;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 20px;
+            font-size: 12px;
+        }
+        .download-btn {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <label for="instituteName">প্রতিষ্ঠানের নাম</label>
+        <input type="text" id="instituteName" placeholder="প্রতিষ্ঠানের নাম লিখুন">
+
+        <label for="slogan">প্রতিষ্ঠানের স্লোগান</label>
+        <input type="text" id="slogan" placeholder="প্রতিষ্ঠানের স্লোগান লিখুন">
+
+        <label for="subject">বিষয়</label>
+        <input type="text" id="subject" placeholder="বিষয় লিখুন">
+
+        <label for="fullMarks">পূর্ণমান</label>
+        <input type="number" id="fullMarks" placeholder="পূর্ণমান লিখুন">
+
+        <label for="time">সময়</label>
+        <input type="text" id="time" placeholder="সময় লিখুন">
+
+        <label for="negativeMarking">নেগেটিভ মার্কিং</label>
+        <input type="text" id="negativeMarking" placeholder="হ্যাঁ/না">
+
+        <label for="numQuestions">প্রশ্ন সংখ্যা</label>
+        <input type="number" id="numQuestions" placeholder="প্রশ্ন সংখ্যা লিখুন">
+
+        <button id="generateOMR">Generate OMR</button>
+    </div>
+
+    <div class="preview" id="preview"></div>
+
+    <button class="download-btn" id="downloadPDF" style="display:none;">Download PDF</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        const banglaNumbers = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+        const banglaLetters = ['ক', 'খ', 'গ', 'ঘ'];
+
+        function convertToBanglaNumber(num) {
+            return String(num).split('').map(digit => banglaNumbers[digit]).join('');
+        }
+
+        document.getElementById('generateOMR').addEventListener('click', () => {
+            const instituteName = document.getElementById('instituteName').value;
+            const slogan = document.getElementById('slogan').value;
+            const subject = document.getElementById('subject').value;
+            const fullMarks = document.getElementById('fullMarks').value;
+            const time = document.getElementById('time').value;
+            const negativeMarking = document.getElementById('negativeMarking').value;
+            const numQuestions = parseInt(document.getElementById('numQuestions').value, 10);
+
+            const preview = document.getElementById('preview');
+            preview.innerHTML = `
+                <div class="omr-header">
+                    <h2>${instituteName}</h2>
+                    <p>${slogan}</p>
+                    <p>বিষয়: ${subject} | পূর্ণমান: ${fullMarks} | সময়: ${time} | নেগেটিভ মার্কিং: ${negativeMarking}</p>
+                    <p>নাম: ____________________ | রোল: ____________________</p>
+                </div>
+                <div class="omr-questions">
+                    ${Array.from({ length: numQuestions }, (_, i) => `
+                        <div class="question">
+                            <span>${convertToBanglaNumber(i + 1)}</span>
+                            <div class="options">
+                                ${banglaLetters.map(letter => `<div class="circle">${letter}</div>`).join('')}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            document.getElementById('downloadPDF').style.display = 'block';
+        });
+
+        document.getElementById('downloadPDF').addEventListener('click', () => {
+            const preview = document.getElementById('preview');
+
+            html2canvas(preview).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgWidth = 190; // Width of the PDF
+                const pageHeight = 297; // Height of the PDF
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+                pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+                pdf.save('omr-sheet.pdf');
+            });
+        });
+    </script>
+</body>
+</html>
