@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OMR শিট জেনারেটর</title>
     <style>
-      @import url('https://fonts.maateen.me/kalpurush/font.css');
+       @import url('https://fonts.maateen.me/kalpurush/font.css');
         body {
             font-family: 'Kalpurush', sans-serif;
             margin: 0;
@@ -37,8 +37,8 @@
         }
 
         .form-group input {
-            font-family: 'Kalpurush', Arial, sans-serif;
-            width: 100%;
+           font-family: 'Kalpurush', Arial, sans-serif;
+ width: 100%;
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
@@ -47,10 +47,8 @@
 
         #preview-container {
             display: none;
-            margin-top: 20px;
             padding: 20px;
             background: white;
-            border: 1px solid #ddd;
         }
 
         .omr-sheet {
@@ -86,9 +84,16 @@
             margin-top: 20px;
         }
 
+        .column-item {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
         .question-item {
             display: flex;
             align-items: center;
+            margin-bottom: 5px;
         }
 
         .question-number {
@@ -98,18 +103,18 @@
 
         .question-options {
             display: flex;
-            gap: 15px;
+            gap: 10px;
         }
 
         .option-circle {
-            width: 30px;
-            height: 30px;
-            border: 2px solid black;
+            width: 25px;
+            height: 25px;
+            border: 1px solid black;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            font-size: 12px;
         }
 
         button {
@@ -125,6 +130,21 @@
 
         button:hover {
             background-color: #0056b3;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            #preview-container, #preview-container * {
+                visibility: visible;
+            }
+
+            #preview-container {
+                margin: 0;
+                padding: 0;
+            }
         }
     </style>
 </head>
@@ -183,38 +203,45 @@
             const banglaNumbers = ["১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯", "১০", "১১", "১২", "১৩", "১৪", "১৫", "১৬", "১৭", "১৮", "১৯", "২০"];
             const banglaLetters = ["ক", "খ", "গ", "ঘ"];
 
-            for (let i = 0; i < numQuestions; i++) {
-                const questionDiv = document.createElement("div");
-                questionDiv.classList.add("question-item");
+            const columns = Math.ceil(numQuestions / 2);
+            for (let col = 0; col < 2; col++) {
+                const columnDiv = document.createElement("div");
+                columnDiv.classList.add("column-item");
 
-                const questionNumber = document.createElement("div");
-                questionNumber.classList.add("question-number");
-                questionNumber.innerText = banglaNumbers[i];
+                for (let i = 0; i < columns; i++) {
+                    const questionIndex = i + col * columns;
+                    if (questionIndex >= numQuestions) break;
 
-                const optionsContainer = document.createElement("div");
-                optionsContainer.classList.add("question-options");
+                    const questionDiv = document.createElement("div");
+                    questionDiv.classList.add("question-item");
 
-                banglaLetters.forEach(letter => {
-                    const option = document.createElement("div");
-                    option.classList.add("option-circle");
-                    option.innerText = letter;
-                    optionsContainer.appendChild(option);
-                });
+                    const questionNumber = document.createElement("div");
+                    questionNumber.classList.add("question-number");
+                    questionNumber.innerText = banglaNumbers[questionIndex];
 
-                questionDiv.appendChild(questionNumber);
-                questionDiv.appendChild(optionsContainer);
-                questionsContainer.appendChild(questionDiv);
+                    const optionsContainer = document.createElement("div");
+                    optionsContainer.classList.add("question-options");
+
+                    banglaLetters.forEach(letter => {
+                        const option = document.createElement("div");
+                        option.classList.add("option-circle");
+                        option.innerText = letter;
+                        optionsContainer.appendChild(option);
+                    });
+
+                    questionDiv.appendChild(questionNumber);
+                    questionDiv.appendChild(optionsContainer);
+                    columnDiv.appendChild(questionDiv);
+                }
+
+                questionsContainer.appendChild(columnDiv);
             }
 
             document.getElementById("preview-container").style.display = "block";
         }
 
         function printOMR() {
-            const printContents = document.getElementById("omr-sheet").innerHTML;
-            const originalContents = document.body.innerHTML;
-            document.body.innerHTML = printContents;
             window.print();
-            document.body.innerHTML = originalContents;
         }
     </script>
 </body>
