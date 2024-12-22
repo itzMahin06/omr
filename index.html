@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OMR Sheet Generator</title>
     <style>
-     @import url('https://fonts.maateen.me/kalpurush/font.css');
+        @import url('https://fonts.maateen.me/kalpurush/font.css');
         body {
             font-family: 'Kalpurush', Arial, sans-serif;
             margin: 20px;
+            line-height: 1.5;
         }
         .form-container {
             margin-bottom: 20px;
@@ -18,7 +19,7 @@
             margin-bottom: 8px;
         }
         input, button {
-           font-family: 'Kalpurush', Arial, sans-serif;
+            font-family: 'Kalpurush', Arial, sans-serif;
             padding: 8px;
             margin-bottom: 10px;
             width: 100%;
@@ -44,17 +45,11 @@
         }
         .omr-questions {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .question-row {
-            display: flex;
-            width: 100%;
-            justify-content: space-between;
-            margin-bottom: 10px;
+            flex-wrap: wrap;
         }
         .question {
-            width: 48%;
+            width: 50%;
+            padding: 5px;
         }
         .question span {
             font-size: 14px;
@@ -72,19 +67,6 @@
             text-align: center;
             line-height: 20px;
             font-size: 12px;
-        }
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-            .preview, .preview * {
-                visibility: visible;
-            }
-            .preview {
-                margin: 0;
-                padding: 0;
-                border: none;
-            }
         }
     </style>
 </head>
@@ -116,10 +98,9 @@
 
     <div class="preview" id="preview"></div>
 
-    <button id="downloadImage" style="display:none;">Download as Image</button>
-    <button id="printOMR" style="display:none;">Print OMR</button>
+    <button id="downloadPDF" style="display:none;">Download PDF</button>
 
-    <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.10.6/dist/html-to-image.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
     <script>
         const banglaNumbers = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
         const banglaLetters = ['ক', 'খ', 'গ', 'ঘ'];
@@ -137,8 +118,6 @@
             const negativeMarking = document.getElementById('negativeMarking').value;
             const numQuestions = parseInt(document.getElementById('numQuestions').value, 10);
 
-            const halfQuestions = Math.ceil(numQuestions / 2);
-
             const preview = document.getElementById('preview');
             preview.innerHTML = `
                 <div class="omr-header">
@@ -148,49 +127,32 @@
                     <p>নাম: ____________________ | রোল: ____________________</p>
                 </div>
                 <div class="omr-questions">
-                    <div class="question-row">
-                        ${Array.from({ length: halfQuestions }, (_, i) => `
-                            <div class="question">
-                                <span>${convertToBanglaNumber(i + 1)}</span>
-                                <div class="options">
-                                    ${banglaLetters.map(letter => `<div class="circle">${letter}</div>`).join('')}
-                                </div>
+                    ${Array.from({ length: numQuestions }, (_, i) => `
+                        <div class="question">
+                            <span>${convertToBanglaNumber(i + 1)}</span>
+                            <div class="options">
+                                ${banglaLetters.map(letter => `<div class="circle">${letter}</div>`).join('')}
                             </div>
-                        `).join('')}
-                    </div>
-                    <div class="question-row">
-                        ${Array.from({ length: numQuestions - halfQuestions }, (_, i) => `
-                            <div class="question">
-                                <span>${convertToBanglaNumber(halfQuestions + i + 1)}</span>
-                                <div class="options">
-                                    ${banglaLetters.map(letter => `<div class="circle">${letter}</div>`).join('')}
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
+                        </div>
+                    `).join('')}
                 </div>
             `;
 
-            document.getElementById('downloadImage').style.display = 'block';
-            document.getElementById('printOMR').style.display = 'block';
+            document.getElementById('downloadPDF').style.display = 'block';
         });
 
-        document.getElementById('downloadImage').addEventListener('click', () => {
-            const preview = document.getElementById('preview');
-            htmlToImage.toPng(preview)
-                .then((dataUrl) => {
-                    const link = document.createElement('a');
-                    link.download = 'omr-sheet.png';
-                    link.href = dataUrl;
-                    link.click();
-                })
-                .catch((error) => {
-                    console.error('Error downloading the image', error);
-                });
-        });
+        document.getElementById('downloadPDF').addEventListener('click', () => {
+            const element = document.getElementById('preview');
 
-        document.getElementById('printOMR').addEventListener('click', () => {
-            window.print();
+            const options = {
+                margin: [10, 10],
+                filename: 'omr-sheet.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(options).from(element).save();
         });
     </script>
 </body>
