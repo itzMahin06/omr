@@ -142,7 +142,7 @@
         @media print {
             body,button * {
                 visibility: hidden;
-                display:none;
+               
             }
 
             #preview-container, #preview-container * {
@@ -191,7 +191,8 @@
             </div>
             <div id="questions-container" class="omr-questions"></div>
         </div>
-        <button onclick="printOMR()">PDF সেভ করুন</button>
+        <button onclick="printOMR()">PDF সেভ করুন</button> <br>
+        <button id="capture-btn">Download as JPG</button> 
     </div>
 
     <script>
@@ -240,6 +241,32 @@
         function printOMR() {
             window.print();
         }
+
+        // Import the html2canvas library dynamically
+(async function () {
+  if (!window.html2canvas) {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+    document.head.appendChild(script);
+    await new Promise((resolve) => (script.onload = resolve));
+  }
+})();
+
+document.getElementById('capture-btn').addEventListener('click', async () => {
+  const previewContainer = document.getElementById('preview-container');
+  
+  // Use html2canvas to capture the element
+  html2canvas(previewContainer, { scale: 2 }).then((canvas) => {
+    // Convert the canvas to a data URL (JPEG format)
+    const image = canvas.toDataURL('image/jpeg', 1.0);
+    
+    // Create a temporary link to download the image
+    const link = document.createElement('a');
+    link.href = image;
+    link.download = 'preview-container.jpg';
+    link.click();
+  });
+});
     </script>
 </body>
 </html>
