@@ -258,6 +258,25 @@ document.getElementById('capture-btn').addEventListener('click', async () => {
   
   // Temporarily hide the button
   captureButton.style.display = 'none';
+   
+function printOMR() {
+  const printButton = document.querySelector('[onclick="printOMR()"]');
+  printButton.style.display = 'none'; // Hide the button
+
+  // Perform the required print or capture actions
+  html2canvas(document.getElementById('preview-container'), { scale: 2 }).then((canvas) => {
+    const image = canvas.toDataURL('image/jpeg', 1.0); // Convert canvas to image
+    
+    // Create a download link
+    const link = document.createElement('a');
+    link.href = image;
+    link.download = 'preview-container.jpg';
+    link.click();
+
+    printButton.style.display = 'inline-block'; // Show the button again
+  });
+}
+
 
   // Use html2canvas to capture the element
   html2canvas(previewContainer, { scale: 2 }).then((canvas) => {
