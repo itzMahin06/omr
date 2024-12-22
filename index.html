@@ -37,8 +37,9 @@
         }
 
         .form-group input {
-           font-family: 'Kalpurush', Arial, sans-serif;
- width: 100%;
+            font-family: 'Kalpurush', sans-serif;
+
+            width: 100%;
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
@@ -80,20 +81,24 @@
         .omr-questions {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+            gap: 0;
             margin-top: 20px;
         }
 
-        .column-item {
+        .question-row {
             display: flex;
-            flex-direction: column;
-            align-items: flex-start;
+            justify-content: space-between;
+            padding: 10px 0;
         }
 
         .question-item {
+            border: 1px solid black;
+            padding: 10px;
             display: flex;
             align-items: center;
-            margin-bottom: 5px;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            border-radius: 4px;
         }
 
         .question-number {
@@ -118,6 +123,8 @@
         }
 
         button {
+            font-family: 'Kalpurush', sans-serif;
+
             padding: 10px 20px;
             background-color: #007bff;
             color: white;
@@ -133,7 +140,7 @@
         }
 
         @media print {
-            body * {
+            body,button * {
                 visibility: hidden;
             }
 
@@ -200,41 +207,30 @@
             const questionsContainer = document.getElementById("questions-container");
             questionsContainer.innerHTML = "";
 
-            const banglaNumbers = ["১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯", "১০", "১১", "১২", "১৩", "১৪", "১৫", "১৬", "১৭", "১৮", "১৯", "২০","২১", "২২", "২৩", "২৪", "২৫", "২৬", "২৭", "২৮", "২৯", "৩০", "৩১", "৩২", "৩৩", "৩৪", "৩৫", "৩৬", "৩৭", "৩৮", "৩৯", "৪০", "৪১", "৪২", "৪৩", "৪৪", "৪৫", "৪৬", "৪৭", "৪৮", "৪৯", "৫০", "৫১", "৫২", "৫৩", "৫৪", "৫৫", "৫৬", "৫৭", "৫৮", "৫৯", "৬০", "৬১", "৬২", "৬৩", "৬৪", "৬৫", "৬৬", "৬৭", "৬৮", "৬৯", "৭০", "৭১", "৭২", "৭৩", "৭৪", "৭৫", "৭৬", "৭৭", "৭৮", "৭৯", "৮০", "৮১", "৮২", "৮৩", "৮৪", "৮৫", "৮৬", "৮৭", "৮৮", "৮৯", "৯০", "৯১", "৯২", "৯৩", "৯৪", "৯৫", "৯৬", "৯৭", "৯৮", "৯৯", "১০০"];
+            const banglaNumbers = ["১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯", "১০", "১১", "১২", "১৩", "১৪", "১৫", "১৬", "১৭", "১৮", "১৯", "২০"];
             const banglaLetters = ["ক", "খ", "গ", "ঘ"];
 
-            const columns = Math.ceil(numQuestions / 2);
-            for (let col = 0; col < 2; col++) {
-                const columnDiv = document.createElement("div");
-                columnDiv.classList.add("column-item");
+            for (let i = 0; i < numQuestions; i++) {
+                const questionDiv = document.createElement("div");
+                questionDiv.classList.add("question-item");
 
-                for (let i = 0; i < columns; i++) {
-                    const questionIndex = i + col * columns;
-                    if (questionIndex >= numQuestions) break;
+                const questionNumber = document.createElement("div");
+                questionNumber.classList.add("question-number");
+                questionNumber.innerText = banglaNumbers[i % banglaNumbers.length];
 
-                    const questionDiv = document.createElement("div");
-                    questionDiv.classList.add("question-item");
+                const optionsContainer = document.createElement("div");
+                optionsContainer.classList.add("question-options");
 
-                    const questionNumber = document.createElement("div");
-                    questionNumber.classList.add("question-number");
-                    questionNumber.innerText = banglaNumbers[questionIndex];
+                banglaLetters.forEach(letter => {
+                    const option = document.createElement("div");
+                    option.classList.add("option-circle");
+                    option.innerText = letter;
+                    optionsContainer.appendChild(option);
+                });
 
-                    const optionsContainer = document.createElement("div");
-                    optionsContainer.classList.add("question-options");
-
-                    banglaLetters.forEach(letter => {
-                        const option = document.createElement("div");
-                        option.classList.add("option-circle");
-                        option.innerText = letter;
-                        optionsContainer.appendChild(option);
-                    });
-
-                    questionDiv.appendChild(questionNumber);
-                    questionDiv.appendChild(optionsContainer);
-                    columnDiv.appendChild(questionDiv);
-                }
-
-                questionsContainer.appendChild(columnDiv);
+                questionDiv.appendChild(questionNumber);
+                questionDiv.appendChild(optionsContainer);
+                questionsContainer.appendChild(questionDiv);
             }
 
             document.getElementById("preview-container").style.display = "block";
