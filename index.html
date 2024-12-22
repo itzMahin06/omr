@@ -254,17 +254,24 @@
 
 document.getElementById('capture-btn').addEventListener('click', async () => {
   const previewContainer = document.getElementById('preview-container');
+  const captureButton = document.getElementById('capture-btn');
   
+  // Temporarily hide the button
+  captureButton.style.display = 'none';
+
   // Use html2canvas to capture the element
   html2canvas(previewContainer, { scale: 2 }).then((canvas) => {
     // Convert the canvas to a data URL (JPEG format)
     const image = canvas.toDataURL('image/jpeg', 1.0);
-    
+
     // Create a temporary link to download the image
     const link = document.createElement('a');
     link.href = image;
-    link.download = 'preview-container.jpg';
+    link.download = 'omr-by-mahin.jpg';
     link.click();
+
+    // Restore the button's visibility
+    captureButton.style.display = 'inline-block';
   });
 });
     </script>
